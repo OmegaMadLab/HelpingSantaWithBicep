@@ -23,10 +23,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       
+      - id: getFiles
       - uses: jitterbit/get-changed-files@v1
       
       - run: |
-          for changed_file in ${{ steps.files.outputs.all }}; do
+          for changed_file in ${{ steps.getFiles.outputs.all }}; do
             echo "Do something with this ${changed_file}."
           done
 
