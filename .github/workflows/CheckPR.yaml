@@ -7,8 +7,8 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'Modules/**.bicep'
-      - 'Modules/**.parameters.json'
+      - 'modules/**.bicep'
+      - 'modules/**.parameters.json'
 
 jobs:
   # Check the PR
@@ -37,7 +37,7 @@ jobs:
             
             # Get the list of bicep files
 
-            $bicepToDeploy = ./.github/workflows/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "Modules"
+            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules"
 
             # For each bicep file that doesn't have its corresponding parameter file, add an error message to an array
             
