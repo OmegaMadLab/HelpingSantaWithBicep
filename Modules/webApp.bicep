@@ -1,3 +1,5 @@
+// This module deploys a web application and its related app service plan
+
 @description('Name of the webapp')
 param webAppName string
 
