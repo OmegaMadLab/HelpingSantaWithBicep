@@ -43,7 +43,7 @@ jobs:
             
             $message = @()
 
-            $updatedBiceps | ForEach-Object {
+            $bicepToDeploy | ForEach-Object {
               $moduleName = $_.split(".")[0]
               $paramFileName = "$moduleName.parameters.json"
             
