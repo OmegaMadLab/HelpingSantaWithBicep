@@ -48,8 +48,7 @@ jobs:
             # All the pushed bicep files will be published to the registry.
             # All the pushed parameter files will trigger a publish activity for the related bicep file.
 
-            $updatedFiles = ("${{ steps.getFiles.outputs.all }}").split(" ")
-            $bicepToDeploy = $updatedFiles.Where({ $_.Contains(".bicep") -or $_.Contains(".parameters.json") }) | Get-Unique
+            $bicepToDeploy = ./.github/workflows/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "Modules" -IncludeParaterFiles
 
             $bicepToDeploy | ForEach-Object {
 

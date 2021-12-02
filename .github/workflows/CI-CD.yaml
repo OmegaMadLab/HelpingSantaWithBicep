@@ -40,12 +40,11 @@ jobs:
         with:
           inlineScript: |   
             
-            # Get all the bicep and parameters files pushed to the repo.
+            # Get all the bicep and parameters files pushed to the modules folder.
             # All the pushed bicep files will be deployed with the what-if option.
             # All the pushed parameter files will trigger a deploy with the what-if option for the related bicep file.
 
-            $updatedFiles = ("${{ steps.getFiles.outputs.all }}").split(" ")
-            $bicepToDeploy = $updatedFiles.Where({ $_.Contains(".bicep") -or $_.Contains(".parameters.json") }) | Get-Unique
+            $bicepToDeploy = ./.github/workflows/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "Modules" -IncludeParaterFiles
 
             $bicepToDeploy | ForEach-Object {
               $moduleName = $_.split(".")[0]
@@ -78,13 +77,11 @@ jobs:
         with:
           inlineScript: |      
           
-            # Get all the bicep and parameters files pushed to the repo.
+            # Get all the bicep and parameters files pushed to the modules folder
             # All the pushed bicep files will be deployed.
             # All the pushed parameter files will trigger a deploy for the related bicep file.
             
-            $updatedFiles = ("${{ steps.getFiles.outputs.all }}").split(" ")
-            $updatedFiles = ("${{ steps.getFiles.outputs.all }}").split(" ")
-            $bicepToDeploy = $updatedFiles.Where({ $_.Contains(".bicep") -or $_.Contains(".parameters.json") }) | Get-Unique
+            $bicepToDeploy = ./.github/workflows/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "Modules" -IncludeParaterFiles
 
             $bicepToDeploy | ForEach-Object {
               $moduleName = $_.split(".")[0]

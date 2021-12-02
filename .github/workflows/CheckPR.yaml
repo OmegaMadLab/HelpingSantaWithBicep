@@ -37,8 +37,7 @@ jobs:
             
             # Get the list of bicep files
 
-            $updatedFiles = ("${{ steps.getFiles.outputs.all }}").split(" ")
-            $updatedBiceps = $updatedFiles.Where({ $_.Contains(".bicep") })
+            $bicepToDeploy = ./.github/workflows/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "Modules"
 
             # For each bicep file that doesn't have its corresponding parameter file, add an error message to an array
             
