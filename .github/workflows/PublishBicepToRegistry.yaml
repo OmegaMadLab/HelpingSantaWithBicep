@@ -32,7 +32,7 @@ jobs:
           creds: ${{ secrets.AZCRED }}
           enable-AzPSSession: true
                      
-1     # Push the modified Bicep files to the registry
+      # Push the modified Bicep files to the registry
       - name: Publish Bicep files to the Bicep registry
         if: ${{ success() }}
         env:

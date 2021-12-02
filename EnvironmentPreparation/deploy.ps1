@@ -12,12 +12,12 @@ $reg = New-AzContainerRegistry -Name "acr$(Get-Random -Maximum 99999)" `
 
 $reg.Name
 $reg.Name | Set-Clipboard
+
 # Paste the content of the clipboard as the value of the environment variable AZURE_BR_NAME in .github\workflows\CheckPR.yaml
 # Example:
 # - name: Publish Bicep files to the Bicep registry
 #         if: ${{ success() }}
 #         env:
-#           AZURE_BR_RESOURCEGROUP_NAME: 'BicepModuleRegistry-RG'
 #           AZURE_BR_NAME: '<paste the value here>'
 
 # Create a service principal and grant it contributor access to the RGs
