@@ -44,7 +44,7 @@ jobs:
             # All the pushed bicep files will be deployed with the what-if option.
             # All the pushed parameter files will trigger a deploy with the what-if option for the related bicep file.
 
-            $bicepToDeploy = ./.github/workflows/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParaterFiles
+            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParaterFiles
 
             $bicepToDeploy | ForEach-Object {
               $moduleName = $_.split(".")[0]

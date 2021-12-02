@@ -48,7 +48,7 @@ jobs:
             # All the pushed bicep files will be published to the registry.
             # All the pushed parameter files will trigger a publish activity for the related bicep file.
 
-            $bicepToDeploy = ./.github/workflows/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParaterFiles
+            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParaterFiles
 
             $bicepToDeploy | ForEach-Object {
 
