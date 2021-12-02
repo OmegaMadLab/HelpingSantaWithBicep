@@ -37,7 +37,7 @@ jobs:
             
             # Get the list of bicep files
 
-            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules"
+            $updatedBiceps = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules"
 
             # For each bicep file that doesn't have its corresponding parameter file, add an error message to an array
             
