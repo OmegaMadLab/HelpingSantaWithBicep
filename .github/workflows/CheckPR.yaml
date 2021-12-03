@@ -1,0 +1,59 @@
+# Check Pull Request
+
+name: Check Pull Request
+# Controls when the workflow will run
+on:
+  # Triggers the workflow pull request events for the main branch that includes bicep or parameter files 
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'modules/**.bicep'
+      - 'modules/**.parameters.json'
+
+jobs:
+  # Check the PR
+  CheckPR:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      # Get all the modified files
+      - id: getFiles
+        name: Get modified files
+        uses: jitterbit/get-changed-files@v1
+  
+      # The version number of each bicep file is contained in the ContentVersion property of its parameter file.
+      # It's expected that each PR on the main branch includes both the bicep files and their related parameter files
+      # with an updated version; otherwise, the "Publish Bicep to registry" action may publish bicep files with an outdated version.
+      # For this reason, the following che will fail if a corresponding parameter file is not included for each bicep file.
+      - id: checkVersion
+        name: Check for version files
+        uses: Amadevus/pwsh-script@v2
+        with:
+          script: |     
+            
+            # Get the list of bicep files
+
+            $updatedFiles = ("${{ steps.getFiles.outputs.all }}").split(" ")
+            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules"
+
+            # For each bicep file that doesn't have its corresponding parameter file, add an error message to an array
+            
+            $message = @()
+
+            $bicepToDeploy | ForEach-Object {
+              $moduleName = $_.split(".")[0]
+              $paramFileName = "$moduleName.parameters.json"
+            
+              if (-not $updatedFiles.Contains($paramFileName)) {
+                $message += "You're modifying $_, but the PR doesn't include the corresponding $paramFileName file. Please include it with an updated ContentVersion value to generate a new tag for the Bicep registry.`r`n"
+              }
+            }
+            
+            # If missing parameter files were found, throw the related messages as an exception
+            if ($message.count -gt 0) {
+              Throw $message -join " "
+            }

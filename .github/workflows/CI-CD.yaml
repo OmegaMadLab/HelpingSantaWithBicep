@@ -1,0 +1,108 @@
+# Continuous integration - deployment
+
+name: CI/CD
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events related to bicep and parameter files on all the branches except the main one
+  push:
+    branches-ignore: [ main ]
+    paths:
+      - 'modules/**.bicep'
+      - 'modules/**.parameters.json'
+
+jobs:
+  # This workflow contains a single job called "build"
+  Build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      # Get all the modified files      
+      - id: getFiles
+        name: Get modified files
+        uses: jitterbit/get-changed-files@v1
+
+      # Login to the Azure sub with the service principal credentials contained in the AZCRED secret
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZCRED }}
+          enable-AzPSSession: true
+                     
+      # Perform a What-If deployment against a resource group to validate linting, pre-flight checks and changes
+      - name: Build ARM Templates from modified bicep files and validate them versus the test environment
+        env:
+          AZURE_RESOURCEGROUP_NAME: 'HelpSantaWithBicep-TestModule-RG'
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |   
+            
+            # Get all the bicep and parameters files pushed to the modules folder.
+            # All the pushed bicep files will be deployed with the what-if option.
+            # All the pushed parameter files will trigger a deploy with the what-if option for the related bicep file.
+
+            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParameterFiles
+
+            Push-Location .\modules\
+
+            $bicepToDeploy | ForEach-Object {
+
+              $moduleName = $_.split(".")[0]
+              $moduleFileName = "$moduleName.bicep"
+              $paramFileName = "$moduleName.parameters.json"
+              
+              # if the repo doesn't contain a parameter file for the bicep file, throw an exception
+
+              if (-not (Test-Path $paramFileName)) {
+                Throw "Please provide a parameter file $paramFileName to test the module $moduleName."
+              }
+            
+              # What-if deployment
+
+              New-AzResourceGroupDeployment -Name $moduleName `
+                -ResourceGroupName '${{ env.AZURE_RESOURCEGROUP_NAME }}' `
+                -TemplateFile $moduleFileName `
+                -TemplateParameterFile $paramFileName `
+                -WhatIf
+              
+            }
+
+            Pop-Location
+
+          azPSVersion: "latest"
+
+      # Perform a deployment against a resource group to test the module
+      - name: Deploy the modified bicep files to the test environment
+        if: ${{ success() }}
+        env:
+          AZURE_RESOURCEGROUP_NAME: 'HelpSantaWithBicep-TestModule-RG'
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |      
+          
+            # Get all the bicep and parameters files pushed to the modules folder
+            # All the pushed bicep files will be deployed.
+            # All the pushed parameter files will trigger a deploy for the related bicep file.
+            
+            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParameterFiles
+
+            Push-Location .\modules\
+
+            $bicepToDeploy | ForEach-Object {
+              $moduleName = $_.split(".")[0]
+              $moduleFileName = "$moduleName.bicep"
+              $paramFileName = "$moduleName.parameters.json"
+           
+              New-AzResourceGroupDeployment -Name $moduleName `
+                -ResourceGroupName '${{ env.AZURE_RESOURCEGROUP_NAME }}' `
+                -TemplateFile $moduleFileName `
+                -TemplateParameterFile $paramFileName
+              
+            }
+
+            Pop-Location
+
+          azPSVersion: "latest"

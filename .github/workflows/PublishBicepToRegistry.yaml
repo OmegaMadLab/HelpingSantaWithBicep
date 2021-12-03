@@ -1,0 +1,79 @@
+# Publish Bicep files to the registry
+
+name: Publish Bicep files to the registry
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events related to bicep or parameter files on the main branch
+  push:
+    branches: [ main ]
+    paths:
+      - 'modules/**.bicep'
+      - 'modules/**.parameters.json'
+
+jobs:
+  # Publish Bicep files to the registry
+  PublishBicepToRegistry:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      # Get all the modified files
+      - id: getFiles
+        name: Get modified files
+        uses: jitterbit/get-changed-files@v1
+  
+      # Login to the Azure sub with the service principal credentials contained in the AZCRED secret
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZCRED }}
+          enable-AzPSSession: true
+                     
+      # Push the modified Bicep files to the registry
+      - name: Publish Bicep files to the Bicep registry
+        if: ${{ success() }}
+        env:
+          # The name of the target Azure Container Registry
+          AZURE_BR_NAME: 'acr5288'
+
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |      
+            
+
+            # Get all the bicep and parameters files pushed to the repo.
+            # All the pushed bicep files will be published to the registry.
+            # All the pushed parameter files will trigger a publish activity for the related bicep file.
+
+            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParameterFiles
+
+            Push-Location .\modules\
+
+            $bicepToDeploy | ForEach-Object {
+
+              # For each bicep file to process, retrieve the module name, the module file name and the related parameter file name 
+              
+              $moduleName = $_.split(".")[0]
+              $moduleFileName = "$moduleName.bicep"
+              $paramFileName = "$moduleName.parameters.json"
+
+              # Use the ContentVersion property in the parameter file as the version that will be used as the tag for the publication
+              
+              $version = (Get-Content $paramFileName | ConvertFrom-Json).contentVersion
+
+              # Concat the target name
+
+              $target = "br:{0}.azurecr.io/modules/{1}:v{2}" -f "${{ env.AZURE_BR_NAME }}", $moduleName.toLower(), $version
+
+              # Use Bicep CLI to publish each file
+
+              bicep publish $moduleFileName --target $target
+              
+            }
+
+            Pop-Location
+
+          azPSVersion: "latest"
