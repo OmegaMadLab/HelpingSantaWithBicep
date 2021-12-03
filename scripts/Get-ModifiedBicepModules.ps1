@@ -18,10 +18,16 @@ param (
 process {
     $updatedFilesInModules = ($FileList.split(" ")).Where({ $_.Contains("$ModuleFolder/") })
     if($IncludeParameterFiles) {
-        $updatedBicepModule = $updatedFilesInModules.Where({ $_.Contains(".bicep") -or $_.Contains(".parameters.json") }) | Get-Unique
+        $updatedBicepModule = $updatedFilesInModules.Where({ $_.Contains(".bicep") -or $_.Contains(".parameters.json") })
     } else {
         $updatedBicepModule = $updatedFilesInModules.Where({ $_.Contains(".bicep") })
     }
 
-    $updatedBicepModule.Replace("$ModuleFolder/", "")
+    $returnArray = @()
+    $updatedBicepModule | ForEach-Object {
+        $returnArray += ($_.Replace("$ModuleFolder/", "")).Split(".")[0]
+    }
+
+    $returnArray | Get-Unique
+    
 }
