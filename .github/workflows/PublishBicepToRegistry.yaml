@@ -50,6 +50,8 @@ jobs:
 
             $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParameterFiles
 
+            Push-Location .\modules\
+
             $bicepToDeploy | ForEach-Object {
 
               # For each bicep file to process, retrieve the module name, the module file name and the related parameter file name 
@@ -71,4 +73,7 @@ jobs:
               bicep publish $moduleFileName --target $target
               
             }
+
+            Pop-Location
+
           azPSVersion: "latest"

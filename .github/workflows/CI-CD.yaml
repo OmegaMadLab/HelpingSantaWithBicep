@@ -46,7 +46,10 @@ jobs:
 
             $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParameterFiles
 
+            Push-Location .\modules\
+
             $bicepToDeploy | ForEach-Object {
+
               $moduleName = $_.split(".")[0]
               $moduleFileName = "$moduleName.bicep"
               $paramFileName = "$moduleName.parameters.json"
@@ -66,6 +69,9 @@ jobs:
                 -WhatIf
               
             }
+
+            Pop-Location
+
           azPSVersion: "latest"
 
       # Perform a deployment against a resource group to test the module
@@ -81,7 +87,9 @@ jobs:
             # All the pushed bicep files will be deployed.
             # All the pushed parameter files will trigger a deploy for the related bicep file.
             
-            $bicepToDeploy = ./.github/workflows/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParameterFiles
+            $bicepToDeploy = ./scripts/Get-ModifiedBicepModules.ps1 -FileList "${{ steps.getFiles.outputs.all }}" -ModuleFolder "modules" -IncludeParameterFiles
+
+            Push-Location .\modules\
 
             $bicepToDeploy | ForEach-Object {
               $moduleName = $_.split(".")[0]
@@ -94,4 +102,7 @@ jobs:
                 -TemplateParameterFile $paramFileName
               
             }
+
+            Pop-Location
+
           azPSVersion: "latest"
