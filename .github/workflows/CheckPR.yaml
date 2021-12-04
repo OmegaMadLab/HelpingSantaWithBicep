@@ -48,7 +48,7 @@ jobs:
               $moduleName = $_.split(".")[0]
               $paramFileName = "$moduleName.parameters.json"
             
-              if (-not $updatedFiles.Contains($paramFileName)) {
+              if (-not $updatedFiles.Contains(modules/$paramFileName)) {
                 $message += "You're modifying $_, but the PR doesn't include the corresponding $paramFileName file. Please include it with an updated ContentVersion value to generate a new tag for the Bicep registry.`r`n"
               }
             }
