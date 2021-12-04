@@ -7,7 +7,7 @@ var tier = 'B1'
 
 var instanceNumber = 1
 
-module webApp 'Modules/webApp.bicep' = {
+module webApp 'br:acr5288.azurecr.io/modules/webapp:v1.0.0.0' = {
   name: name
   params: {
     webAppName: name
