@@ -29,7 +29,7 @@ var environmentSettings = {
   }
 }
 
-module webApp 'br:acr5288.azurecr.io/modules/webapp:v1.0.0.0' = [for region in environmentRegion[environment]: {
+module webApp 'br:acr5288.azurecr.io/modules/webapp:v1.0.0.2' = [for region in environmentRegion[environment]: {
   name: 'webApp-${environment}-${region}'
   params: {
     webAppName: name
