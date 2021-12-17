@@ -7,7 +7,7 @@ var tier = 'B1'
 
 var instanceNumber = 1
 
-module webApp 'br:acr5288.azurecr.io/modules/webapp:v1.0.0.4' = {
+module webApp 'br:acr5288.azurecr.io/modules/webapp:v1.0.0.5' = {
   name: name
   params: {
     webAppName: name
