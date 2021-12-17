@@ -1,4 +1,5 @@
-// This module deploys an app service and its related app service plan 
+// This module deploys an app service 
+// and its related app service plan 
 
 
 @description('Name of the webapp')
